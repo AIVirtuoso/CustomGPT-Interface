@@ -14,6 +14,8 @@ import {
 } from "@fortaine/fetch-event-source";
 import { prettyObject } from "@/app/utils/format";
 import { getClientConfig } from "@/app/config/client";
+import { sendRequestsWithToken } from "@/app/utils/fetch";
+import { op } from "@tensorflow/tfjs";
 
 export interface OpenAIListModelResponse {
   object: string;
@@ -54,6 +56,8 @@ export class ChatGPTApi implements LLMApi {
       content: v.content,
     }));
 
+    console.log("Messages--: ", messages);
+
     const modelConfig = {
       ...useAppConfig.getState().modelConfig,
       ...useChatStore.getState().currentSession().mask.modelConfig,
@@ -70,12 +74,14 @@ export class ChatGPTApi implements LLMApi {
       presence_penalty: modelConfig.presence_penalty,
       frequency_penalty: modelConfig.frequency_penalty,
       top_p: modelConfig.top_p,
+      bot_id: "35345293082374230523572",
     };
 
     console.log("[Request] openai payload: ", requestPayload);
 
     const shouldStream = !!options.config.stream;
     const controller = new AbortController();
+    console.log("controller: ", controller);
     options.onController?.(controller);
 
     try {
@@ -106,73 +112,31 @@ export class ChatGPTApi implements LLMApi {
 
         controller.signal.onabort = finish;
 
-        fetchEventSource(chatPath, {
-          ...chatPayload,
-          async onopen(res) {
-            clearTimeout(requestTimeoutId);
-            const contentType = res.headers.get("content-type");
-            console.log(
-              "[OpenAI] request response content type: ",
-              contentType,
-            );
+        sendRequestsWithToken("user-question", chatPayload)
+          .then(response => {
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            function read() {
+              return reader.read().then(({ done, value }) => {
 
-            if (contentType?.startsWith("text/plain")) {
-              responseText = await res.clone().text();
-              return finish();
+                if (done) {
+                  console.log('Streaming completed.');
+                  options.onUpdate?.(responseText, value);
+                  options.onFinish(responseText);
+                  return;
+                }
+                const data = decoder.decode(value);
+                responseText += data;
+                options.onUpdate?.(responseText, value);
+                return read();
+              });
             }
+            return read();
+          })
+          .catch(error => {
+            console.error('Error fetching streaming data:', error);
+          });
 
-            if (
-              !res.ok ||
-              !res.headers
-                .get("content-type")
-                ?.startsWith(EventStreamContentType) ||
-              res.status !== 200
-            ) {
-              const responseTexts = [responseText];
-              let extraInfo = await res.clone().text();
-              try {
-                const resJson = await res.clone().json();
-                extraInfo = prettyObject(resJson);
-              } catch {}
-
-              if (res.status === 401) {
-                responseTexts.push(Locale.Error.Unauthorized);
-              }
-
-              if (extraInfo) {
-                responseTexts.push(extraInfo);
-              }
-
-              responseText = responseTexts.join("\n\n");
-
-              return finish();
-            }
-          },
-          onmessage(msg) {
-            if (msg.data === "[DONE]" || finished) {
-              return finish();
-            }
-            const text = msg.data;
-            try {
-              const json = JSON.parse(text);
-              const delta = json.choices[0].delta.content;
-              if (delta) {
-                responseText += delta;
-                options.onUpdate?.(responseText, delta);
-              }
-            } catch (e) {
-              console.error("[Request] parse error", text, msg);
-            }
-          },
-          onclose() {
-            finish();
-          },
-          onerror(e) {
-            options.onError?.(e);
-            throw e;
-          },
-          openWhenHidden: true,
-        });
       } else {
         const res = await fetch(chatPath, chatPayload);
         clearTimeout(requestTimeoutId);
@@ -197,6 +161,10 @@ export class ChatGPTApi implements LLMApi {
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const startDate = formatDate(startOfMonth);
     const endDate = formatDate(new Date(Date.now() + ONE_DAY));
+
+    console.log("--------------", this.path(
+      `${OpenaiPath.UsagePath}?start_date=${startDate}&end_date=${endDate}`,
+    ));
 
     const [used, subs] = await Promise.all([
       fetch(

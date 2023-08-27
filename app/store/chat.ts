@@ -27,6 +27,7 @@ export type ChatMessage = RequestMessage & {
 };
 
 export function createMessage(override: Partial<ChatMessage>): ChatMessage {
+  // console.log("override: ", override);
   return {
     id: nanoid(),
     date: new Date().toLocaleString(),
@@ -127,8 +128,10 @@ function fillTemplateWith(input: string, modelConfig: ModelConfig) {
     output += "\n" + inputVar;
   }
 
+
   Object.entries(vars).forEach(([name, value]) => {
     output = output.replaceAll(`{{${name}}}`, value);
+    console.log("template: ", output);
   });
 
   return output;
@@ -291,11 +294,15 @@ export const useChatStore = create<ChatStore>()(
           streaming: true,
           model: modelConfig.model,
         });
+        // console.log("[botMessage] template: ", botMessage);
 
         // get recent messages
         const recentMessages = get().getMessagesWithMemory();
+        // console.log("recentMessages: ", recentMessages);
         const sendMessages = recentMessages.concat(userMessage);
+        // console.log("sendMessage: ", sendMessages);
         const messageIndex = get().currentSession().messages.length + 1;
+        // console.log("messageIndex: ", messageIndex);
 
         // save user's and bot's message
         get().updateCurrentSession((session) => {
@@ -310,6 +317,7 @@ export const useChatStore = create<ChatStore>()(
         });
 
         // make request
+        console.log("sendmessage: ", sendMessages);
         api.llm.chat({
           messages: sendMessages,
           config: { ...modelConfig, stream: true },
@@ -389,14 +397,14 @@ export const useChatStore = create<ChatStore>()(
         const shouldInjectSystemPrompts = modelConfig.enableInjectSystemPrompts;
         const systemPrompts = shouldInjectSystemPrompts
           ? [
-              createMessage({
-                role: "system",
-                content: fillTemplateWith("", {
-                  ...modelConfig,
-                  template: DEFAULT_SYSTEM_TEMPLATE,
-                }),
+            createMessage({
+              role: "system",
+              content: fillTemplateWith("", {
+                ...modelConfig,
+                template: DEFAULT_SYSTEM_TEMPLATE,
               }),
-            ]
+            }),
+          ]
           : [];
         if (shouldInjectSystemPrompts) {
           console.log(
@@ -506,8 +514,8 @@ export const useChatStore = create<ChatStore>()(
             onFinish(message) {
               get().updateCurrentSession(
                 (session) =>
-                  (session.topic =
-                    message.length > 0 ? trimTopic(message) : DEFAULT_TOPIC),
+                (session.topic =
+                  message.length > 0 ? trimTopic(message) : DEFAULT_TOPIC),
               );
             },
           });

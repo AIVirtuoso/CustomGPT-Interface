@@ -21,11 +21,20 @@ function getModels(remoteModelRes: OpenAIListModelResponse) {
 }
 
 async function handle(
-  req: NextRequest,
+  req: Request,
   { params }: { params: { path: string[] } },
 ) {
   console.log("[OpenAI Route] params ", params);
-
+  // if (!req.body) return;
+  // const stream: any = req.body;
+  // const reader = stream.getReader();
+  // const chunks = [];
+  // for await (const chunk of stream) {
+  //   chunks.push(chunk);
+  // }
+  // const data = Buffer.concat(chunks).toString('utf-8');
+  const data = await req.json();
+  console.log(data.messages);
   if (req.method === "OPTIONS") {
     return NextResponse.json({ body: "OK" }, { status: 200 });
   }
@@ -52,6 +61,7 @@ async function handle(
     });
   }
 
+
   try {
     const response = await requestOpenai(req);
 
@@ -63,7 +73,6 @@ async function handle(
         status: response.status,
       });
     }
-
     return response;
   } catch (e) {
     console.error("[OpenAI] ", e);

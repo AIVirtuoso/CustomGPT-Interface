@@ -55,6 +55,13 @@ const MaskPage = dynamic(async () => (await import("./mask")).MaskPage, {
   loading: () => <Loading noLogo />,
 });
 
+const UploadPage = dynamic(async () => (await import("./upload")).UploadPage, {
+  loading: () => <Loading noLogo />,
+});
+const UrlPage = dynamic(async () => (await import("./url")).UrlPage, {
+  loading: () => <Loading noLogo />,
+});
+
 export function useSwitchTheme() {
   const config = useAppConfig();
 
@@ -154,6 +161,8 @@ function Screen() {
               <Route path={Path.Home} element={<Chat />} />
               <Route path={Path.NewChat} element={<NewChat />} />
               <Route path={Path.Masks} element={<MaskPage />} />
+              <Route path={Path.Upload} element={<UploadPage />} />
+              <Route path={Path.Url} element={<UrlPage />} />
               <Route path={Path.Chat} element={<Chat />} />
               <Route path={Path.Settings} element={<Settings />} />
             </Routes>

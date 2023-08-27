@@ -35,6 +35,7 @@ import BottomIcon from "../icons/bottom.svg";
 import StopIcon from "../icons/pause.svg";
 import RobotIcon from "../icons/robot.svg";
 import UploadIcon from "../icons/upload.svg";
+import UrlIcon from "../icons/url.svg";
 
 import {
   ChatMessage,
@@ -190,94 +191,71 @@ function PromptToast(props: {
   );
 }
 
-const importFromFile = () => {
-  readFromFile().then((content) => {
-    console.log(content);
-  });
-};
+// const importFromFile = () => {
+//   readFromFile().then((content) => {
+//     console.log(content);
+//   });
+// };
 
-export function FileUploadModal(props: { onClose: () => void }) {
-  const chatStore = useChatStore();
-  const session = chatStore.currentSession();
-  const maskStore = useMaskStore();
-  const navigate = useNavigate();
+// export function FileUploadModal(props: { onClose: () => void }) {
+//   const chatStore = useChatStore();
+//   const session = chatStore.currentSession();
+//   const maskStore = useMaskStore();
+//   const navigate = useNavigate();
 
-  return (
-    <div className="modal-mask">
-      <Modal
-        title={Locale.Context.Edit}
-        onClose={() => props.onClose()}
-        actions={[
-          <IconButton
-            key="reset"
-            icon={<ResetIcon />}
-            bordered
-            text={Locale.Chat.Config.Reset}
-            onClick={async () => {
-              if (await showConfirm(Locale.Memory.ResetConfirm)) {
-                chatStore.updateCurrentSession(
-                  (session) => (session.memoryPrompt = ""),
-                );
-              }
-            }}
-          />,
-          <IconButton
-            key="copy"
-            icon={<CopyIcon />}
-            bordered
-            text={Locale.Chat.Config.SaveAs}
-            onClick={() => {
-              navigate(Path.Masks);
-              setTimeout(() => {
-                maskStore.create(session.mask);
-              }, 500);
-            }}
-          />,
-        ]}
-      >
-        <div className="window-action-button">
-          <IconButton
-            icon={<UploadIcon />}
-            bordered
-            onClick={() => importFromFile()}
-          />
-        </div>
+//   return (
+//     <div className="modal-mask">
+//       <Modal
+//         title={Locale.Context.Edit}
+//         onClose={() => props.onClose()}
+//         actions={[
+//           <IconButton
+//             key="reset"
+//             icon={<ResetIcon />}
+//             bordered
+//             text={Locale.Chat.Config.Reset}
+//           />,
+//           <IconButton
+//             key="copy"
+//             icon={<CopyIcon />}
+//             bordered
+//             text={Locale.Chat.Config.SaveAs}
+//             onClick={() => {
+//               navigate(Path.Masks);
+//               setTimeout(() => {
+//                 maskStore.create(session.mask);
+//               }, 500);
+//             }}
+//           />,
+//         ]}
+//       >
+//         <div className="window-action-button">
+//           <IconButton
+//             icon={<UploadIcon />}
+//             bordered
+//             onClick={() => importFromFile()}
+//           />
+//         </div>
+//       </Modal>
+//     </div>
+//   );
+// }
 
+// function FileUpload(props: {
+//   showToast?: boolean;
+//   showModal?: boolean;
+//   setShowModal: (_: boolean) => void;
+// })
 
-      </Modal>
-    </div>
-  );
-}
-
-function FileUpload(props: {
-  showToast?: boolean;
-  showModal?: boolean;
-  setShowModal: (_: boolean) => void;
-}) {
-  const chatStore = useChatStore();
-  const session = chatStore.currentSession();
-  const context = session.mask.context;
-
-  return (
-    <div className={styles["prompt-toast"]} key="prompt-toast">
-      {props.showToast && (
-        <div
-          className={styles["prompt-toast-inner"] + " clickable"}
-          role="button"
-          onClick={() => props.setShowModal(true)}
-        >
-          <BrainIcon />
-          <span className={styles["prompt-toast-content"]}>
-            {Locale.Context.Toast(context.length)}
-          </span>
-        </div>
-      )}
-      {props.showModal && (
-        <FileUploadModal onClose={() => props.setShowModal(false)} />
-      )}
-    </div>
-  );
-}
+// {
+//   return (
+//     <div className={styles["prompt-toast"]} key="prompt-toast">
+//       {props.showModal && (
+//         <FileUploadModal onClose={() => props.setShowModal(false)} />
+//       )}
+//     </div>
+//   );
+// }
 
 function useSubmitHandler() {
   const config = useAppConfig();
@@ -602,17 +580,22 @@ export function ChatActions(props: {
         }}
       />
       
-      {/* ------------------ Upload Files Beggin ----------------- */}
+      {/* ------------------ Upload Files Icon Beggin ----------------- */}
 
       <ChatAction
-        onClick={props.showUploadModal}
+        onClick={() => {navigate(Path.Upload);}}
         text = "Upload Files"
         icon={<UploadIcon />}
       />
 
 
+      <ChatAction
+        onClick={() => {navigate(Path.Url);}}
+        text = "Scraping Url"
+        icon={<UrlIcon />}
+      />
 
-      {/* ------------------ Upload Files End ----------------- */}
+      {/* ------------------ Upload Files Icon End ----------------- */}
 
       <ChatAction
         onClick={() => setShowModelSelector(true)}
@@ -1197,12 +1180,6 @@ function _Chat() {
           showModal={showPromptModal}
           // showModal={true}
           setShowModal={setShowPromptModal}
-        />
-
-        <FileUpload
-          showToast={!hitBottom}
-          showModal={showUploadModal}
-          setShowModal={setShowUploadModal}
         />
 
         {/* ----------- Settings Modal End ------------------- */}

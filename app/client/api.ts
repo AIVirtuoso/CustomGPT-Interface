@@ -74,14 +74,16 @@ export class ClientApi {
   public llm: LLMApi;
 
   constructor() {
+    console.log("begin");
     this.llm = new ChatGPTApi();
+    console.log("end");
   }
 
-  config() {}
+  config() { }
 
-  prompts() {}
+  prompts() { }
 
-  masks() {}
+  masks() { }
 
   async share(messages: ChatMessage[], avatarUrl: string | null = null) {
     const msgs = messages
