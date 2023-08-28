@@ -24,7 +24,7 @@ import {
 } from "./ui-lib";
 import CopyIcon from "../icons/copy.svg";
 
-const SessionConfigModel = ( props: { onClose: () => void, content: string } ) => {
+const URLContentModal = ( props: { onClose: () => void, content: string } ) => {
   return (
     <div className="modal-mask">
       <Modal
@@ -152,7 +152,7 @@ export function UrlPage() {
                     <img src="https://cdn.staticfile.org/emoji-datasource-apple/14.0.0/img/apple/64/1f5bc-fe0f.png" alt="framed picture" className="__EmojiPicker__ epr-emoji-img" loading="eager" style={{fontSize: "18px", height: "18px", width: "18px"}} />
                   </div>
                   <div className={styles["mask-title"]}>
-                    <div className={styles["mask-name"]} onClick={() => fetchContent(page)}>{page}</div>
+                    <div className={styles["mask-name"]} onClick={() => fetchContent(page)} >{page}</div>
                   </div>
                 </div>
                 <div className={styles["mask-actions"]}>
@@ -168,7 +168,7 @@ export function UrlPage() {
         </div>
       </div>
       {showModal && (
-        <SessionConfigModel onClose={() => setShowModal(false)} content={content} />
+        <URLContentModal onClose={() => setShowModal(false)} content={content} />
       )}
     </ErrorBoundary>
   );
