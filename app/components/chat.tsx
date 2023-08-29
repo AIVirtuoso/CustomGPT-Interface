@@ -191,72 +191,6 @@ function PromptToast(props: {
   );
 }
 
-// const importFromFile = () => {
-//   readFromFile().then((content) => {
-//     console.log(content);
-//   });
-// };
-
-// export function FileUploadModal(props: { onClose: () => void }) {
-//   const chatStore = useChatStore();
-//   const session = chatStore.currentSession();
-//   const maskStore = useMaskStore();
-//   const navigate = useNavigate();
-
-//   return (
-//     <div className="modal-mask">
-//       <Modal
-//         title={Locale.Context.Edit}
-//         onClose={() => props.onClose()}
-//         actions={[
-//           <IconButton
-//             key="reset"
-//             icon={<ResetIcon />}
-//             bordered
-//             text={Locale.Chat.Config.Reset}
-//           />,
-//           <IconButton
-//             key="copy"
-//             icon={<CopyIcon />}
-//             bordered
-//             text={Locale.Chat.Config.SaveAs}
-//             onClick={() => {
-//               navigate(Path.Masks);
-//               setTimeout(() => {
-//                 maskStore.create(session.mask);
-//               }, 500);
-//             }}
-//           />,
-//         ]}
-//       >
-//         <div className="window-action-button">
-//           <IconButton
-//             icon={<UploadIcon />}
-//             bordered
-//             onClick={() => importFromFile()}
-//           />
-//         </div>
-//       </Modal>
-//     </div>
-//   );
-// }
-
-// function FileUpload(props: {
-//   showToast?: boolean;
-//   showModal?: boolean;
-//   setShowModal: (_: boolean) => void;
-// })
-
-// {
-//   return (
-//     <div className={styles["prompt-toast"]} key="prompt-toast">
-//       {props.showModal && (
-//         <FileUploadModal onClose={() => props.setShowModal(false)} />
-//       )}
-//     </div>
-//   );
-// }
-
 function useSubmitHandler() {
   const config = useAppConfig();
   const submitKey = config.submitKey;
@@ -476,7 +410,6 @@ function useScrollToBottom() {
 
 export function ChatActions(props: {
   showPromptModal: () => void;
-  showUploadModal: () => void;
   scrollToBottom: () => void;
   showPromptHints: () => void;
   hitBottom: boolean;
@@ -622,13 +555,6 @@ export function ChatActions(props: {
         />
       )}
 
-      
-
-
-
-
-
-
     </div>
   );
 }
@@ -699,7 +625,9 @@ function _Chat() {
   type RenderMessage = ChatMessage & { preview?: boolean };
 
   const chatStore = useChatStore();
+  // chatStore.newSession();
   const session = chatStore.currentSession();
+  // const session = chatStore.newSession();
   const config = useAppConfig();
   const fontSize = config.fontSize;
 
@@ -1018,6 +946,8 @@ function _Chat() {
     _setMsgRenderIndex(newIndex);
   }
 
+  // const messages: { message: string }[] = [];
+  
   const messages = useMemo(() => {
     const endRenderIndex = Math.min(
       msgRenderIndex + 3 * CHAT_PAGE_SIZE,
@@ -1059,7 +989,6 @@ function _Chat() {
       : -1;
 
   const [showPromptModal, setShowPromptModal] = useState(false);
-  const [showUploadModal, setShowUploadModal] = useState(false);
 
   const clientConfig = useMemo(() => getClientConfig(), []);
 
@@ -1325,7 +1254,6 @@ function _Chat() {
 
         <ChatActions
           showPromptModal={() => setShowPromptModal(true)}
-          showUploadModal={() => setShowUploadModal(true)}    // goldrace
           scrollToBottom={scrollToBottom}
           hitBottom={hitBottom}
           showPromptHints={() => {

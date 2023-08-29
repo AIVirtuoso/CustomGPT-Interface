@@ -114,9 +114,12 @@ export class ChatGPTApi implements LLMApi {
 
         sendRequestsWithToken("user-question", chatPayload)
           .then(response => {
-            const reader = response.body.getReader();
+            const reader = response.body?.getReader();
             const decoder = new TextDecoder();
-            function read() {
+            function read(): Promise<any> {
+              if (!reader) { // perform a null check
+                throw new Error('Reader is not defined');
+              }
               return reader.read().then(({ done, value }) => {
 
                 if (done) {

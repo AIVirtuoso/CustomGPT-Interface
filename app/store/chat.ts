@@ -269,6 +269,7 @@ export const useChatStore = create<ChatStore>()(
       },
 
       onNewMessage(message) {
+        console.log("message: ", message);
         get().updateCurrentSession((session) => {
           session.messages = session.messages.concat();
           session.lastUpdate = Date.now();

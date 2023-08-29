@@ -28,7 +28,8 @@ const URLContentModal = ( props: { onClose: () => void, content: string } ) => {
   return (
     <div className="modal-mask">
       <Modal
-        title={Locale.Context.Edit}
+        // title={Locale.Context.Edit}
+        title="Content"
         onClose={() => props.onClose()}
       >
         <div style={{height: "750px", maxHeight: "750px"}}>
@@ -43,7 +44,7 @@ const URLContentModal = ( props: { onClose: () => void, content: string } ) => {
 export function UrlPage() {
   const navigate = useNavigate();
   const [linkVal, setLinkVal] = useState("");
-  const [pages, setPages] = useState([]);
+  const [pages, setPages] = useState<string[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [content, setContent] = useState('');
   const handleonClickAddUrlButton = useCallback(() => {
@@ -60,7 +61,7 @@ export function UrlPage() {
       });
   }, [linkVal, pages]);
 
-  const handleonClickRemoveButton = useCallback((index) => {
+  const handleonClickRemoveButton = useCallback((index: any) => {
     
     console.log(pages[index]);
     if (window.confirm("Are you sure want to delete?")) {
@@ -71,16 +72,16 @@ export function UrlPage() {
         body: formdata,
       })
         .then(response => response.json())
-        .then(
+        .then((result) => {
           setPages(pages.slice(0, index).concat(pages.slice(index + 1)))
-        )
+        })
         .catch(err => {
           alert("Error");
         })
     }
   }, [pages])
 
-  const fetchContent = useCallback((url) => {
+  const fetchContent = useCallback((url: any) => {
     setShowModal(true)
     console.log(url);
     setContent("Loading...");

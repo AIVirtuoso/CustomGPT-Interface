@@ -11,13 +11,14 @@ export const DEFAULT_API_HOST = "https://chatgpt1.nextweb.fun/api/proxy";
 
 export enum Path {
   Home = "/",
-  Chat = "/chat",
+  Chat = "/chat/:chatbotId/:chatlogId",
   Settings = "/settings",
   NewChat = "/new-chat",
   Masks = "/masks",
   Upload = "/upload",
   Auth = "/auth",
-  Url = "/url"
+  Url = "/url",
+  Dashboard = "/dashboard"
 }
 
 export enum SlotID {

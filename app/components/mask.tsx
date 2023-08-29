@@ -72,6 +72,7 @@ export function MaskConfig(props: {
   extraListItems?: JSX.Element;
   readonly?: boolean;
   shouldSyncFromGlobal?: boolean;
+  setBotName?: any
 }) {
   const [showPicker, setShowPicker] = useState(false);
 
@@ -112,6 +113,7 @@ export function MaskConfig(props: {
               <AvatarPicker
                 onEmojiClick={(emoji) => {
                   props.updateMask((mask) => (mask.avatar = emoji));
+                  console.log(emoji);
                   setShowPicker(false);
                 }}
               ></AvatarPicker>
@@ -130,11 +132,12 @@ export function MaskConfig(props: {
         <ListItem title={Locale.Mask.Config.Name}>
           <input
             type="text"
-            value={props.mask.name}
-            onInput={(e) =>
-              props.updateMask((mask) => {
-                mask.name = e.currentTarget.value;
-              })
+            onInput={(e) => {
+                props.setBotName(e.currentTarget.value);
+                props.updateMask((mask) => {
+                  mask.name = e.currentTarget.value;
+                })
+              }
             }
           ></input>
         </ListItem>

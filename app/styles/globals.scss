@@ -111,7 +111,10 @@ body {
     background-color: var(--second);
   }
 }
-
+a {
+  color: unset;
+  text-decoration: none;
+}
 ::-webkit-scrollbar {
   --bar-width: 5px;
   width: var(--bar-width);

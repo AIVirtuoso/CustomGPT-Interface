@@ -18,12 +18,15 @@ import { ErrorBoundary } from "./error";
 import { getISOLang, getLang } from "../locales";
 
 import {
-  HashRouter as Router,
+  HashRouter  as Router,
   Routes,
   Route,
   useLocation,
+  
 } from "react-router-dom";
 import { SideBar } from "./sidebar";
+import { Dashboard_SideBar } from "./dashboard-sidebar";
+
 import { useAppConfig } from "../store/config";
 import { AuthPage } from "./auth";
 import { getClientConfig } from "../config/client";
@@ -44,6 +47,10 @@ const Settings = dynamic(async () => (await import("./settings")).Settings, {
 });
 
 const Chat = dynamic(async () => (await import("./chat")).Chat, {
+  loading: () => <Loading noLogo />,
+});
+
+const Dashboard = dynamic(async () => (await import("./dashboard")).Dashboard, {
   loading: () => <Loading noLogo />,
 });
 
@@ -131,6 +138,8 @@ function Screen() {
   const location = useLocation();
   const isHome = location.pathname === Path.Home;
   const isAuth = location.pathname === Path.Auth;
+  // const isChatPage = location.pathname !== Path.Dashboard;
+  // const isAuth = true;
   const isMobileScreen = useMobileScreen();
 
   useEffect(() => {
@@ -138,6 +147,7 @@ function Screen() {
   }, []);
 
   return (
+    
     <div
       className={
         styles.container +
@@ -154,16 +164,19 @@ function Screen() {
         </>
       ) : (
         <>
-          <SideBar className={isHome ? styles["sidebar-show"] : ""} />
+          
+          {/* {!isHome && <SideBar className={isHome ? styles["sidebar-show"] : ""} />} */}
+          <Dashboard_SideBar className={isHome ? styles["sidebar-show"] : ""} />
 
           <div className={styles["window-content"]} id={SlotID.AppBody}>
             <Routes>
-              <Route path={Path.Home} element={<Chat />} />
+              <Route path={Path.Home} element={<Dashboard />} />
               <Route path={Path.NewChat} element={<NewChat />} />
               <Route path={Path.Masks} element={<MaskPage />} />
               <Route path={Path.Upload} element={<UploadPage />} />
               <Route path={Path.Url} element={<UrlPage />} />
               <Route path={Path.Chat} element={<Chat />} />
+              {/* <Route path="/chat/:chatbotId" element={<Chat />} /> */}
               <Route path={Path.Settings} element={<Settings />} />
             </Routes>
           </div>

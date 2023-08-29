@@ -70,7 +70,7 @@ export function UploadPage() {
     }
   }, [file, files])
 
-  const handleonClickRemoveButton = useCallback((index) => {
+  const handleonClickRemoveButton = useCallback((index: any) => {
     
     console.log(files[index]);
     if (window.confirm("Are you sure want to delete?")) {
@@ -81,9 +81,9 @@ export function UploadPage() {
         body: formdata,
       })
         .then(response => response.json())
-        .then(
+        .then((result) => {
           setFiles(files.slice(0, index).concat(files.slice(index + 1)))
-        )
+        })
         .catch(err => {
           alert("Error");
         })
