@@ -31,7 +31,7 @@ export function IconButton(props: {
       role="button"
       tabIndex={props.tabIndex}
       autoFocus={props.autoFocus}
-      style={{width: "200px", justifyContent: "left"}}
+      style={{width: "100%", justifyContent: "left"}}
     >
       {props.icon && (
         <div

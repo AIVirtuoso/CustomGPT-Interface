@@ -1,20 +1,23 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import styles from "./home.module.scss";
+import chat_styles from "./chat.module.scss";
 
 import { IconButton } from "./dashboard_button";
 import SettingsIcon from "../icons/settings.svg";
 import GithubIcon from "../icons/github.svg";
+import DashboardIcon from "../icons/dashboard.svg";
+import AnalyticsIcon from "../icons/analytics.svg";
+import ChatLogsIcon from "../icons/chat-logs.svg";
 import ChatGptIcon from "../icons/chatgpt.svg";
-import AddIcon from "../icons/add.svg";
-import CloseIcon from "../icons/close.svg";
-import MaskIcon from "../icons/mask.svg";
-import PluginIcon from "../icons/plugin.svg";
+import LightIcon from "../icons/light.svg";
+import DarkIcon from "../icons/dark.svg";
+import AutoIcon from "../icons/auto.svg";
 import DragIcon from "../icons/drag.svg";
 
 import Locale from "../locales";
 
-import { useAppConfig, useChatStore } from "../store";
+import { useAppConfig, useChatStore, Theme} from "../store";
 
 import {
   MAX_SIDEBAR_WIDTH,
@@ -100,6 +103,51 @@ function useDragSideBar() {
   };
 }
 
+function ChatAction(props: {
+  icon: JSX.Element;
+  onClick: () => void;
+}) {
+  const iconRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState({
+    full: 16,
+    icon: 16,
+  });
+
+  function updateWidth() {
+    if (!iconRef.current || !textRef.current) return;
+    const getWidth = (dom: HTMLDivElement) => dom.getBoundingClientRect().width;
+    const textWidth = getWidth(textRef.current);
+    const iconWidth = getWidth(iconRef.current);
+    setWidth({
+      full: textWidth + iconWidth,
+      icon: iconWidth,
+    });
+  }
+
+  return (
+    <div
+      className={`${chat_styles["chat-input-action"]} clickable`}
+      onClick={() => {
+        props.onClick();
+        setTimeout(updateWidth, 1);
+      }}
+      onMouseEnter={updateWidth}
+      onTouchStart={updateWidth}
+      style={
+        {
+          "--icon-width": `${width.icon}px`,
+          "--full-width": `${width.full}px`,
+        } as React.CSSProperties
+      }
+    >
+      <div ref={iconRef} className={chat_styles["icon"]}>
+        {props.icon}
+      </div>
+    </div>
+  );
+}
+
 export function Dashboard_SideBar(props: { className?: string }) {
   const chatStore = useChatStore();
 
@@ -109,6 +157,14 @@ export function Dashboard_SideBar(props: { className?: string }) {
   const config = useAppConfig();
 
   useHotKey();
+  const theme = config.theme;
+  function nextTheme() {
+    const themes = [Theme.Auto, Theme.Light, Theme.Dark];
+    const themeIndex = themes.indexOf(theme);
+    const nextIndex = (themeIndex + 1) % themes.length;
+    const nextTheme = themes[nextIndex];
+    config.update((config) => (config.theme = nextTheme));
+  }
 
   return (
     <div
@@ -118,7 +174,7 @@ export function Dashboard_SideBar(props: { className?: string }) {
     >
       <div className={styles["sidebar-header"]} data-tauri-drag-region>
         <div className={styles["sidebar-title"]} data-tauri-drag-region>
-          Dashboard
+          Tenfold Traffic
         </div>
         <div className={styles["sidebar-sub-title"]}>
           Create your own Chatbots
@@ -128,14 +184,12 @@ export function Dashboard_SideBar(props: { className?: string }) {
         </div>
       </div>
 
-      
-
       <div className={styles["sidebar-body"]}>
         
           <div className={styles["sidebar-action"]}  style={{marginTop: "20px"}}>
             <Link to={Path.Home}>
               <IconButton
-                icon={<SettingsIcon />}
+                icon={<DashboardIcon />}
                 text={shouldNarrow ? undefined : "Dashboard"}
                 shadow 
               />
@@ -143,27 +197,25 @@ export function Dashboard_SideBar(props: { className?: string }) {
           </div>
 
           <div className={styles["sidebar-action"]} style={{marginTop: "20px"}} >
-            {/* <Link to={Path.Settings} */}
+            <Link to={Path.Settings}>
               <IconButton
-                icon={<SettingsIcon />}
+                icon={<ChatLogsIcon />}
                 text={shouldNarrow ? undefined : "Chat Logs"}
                 shadow
                 onClick={() => navigate("/chatlogs", { state: { fromHome: true } })}
               />
-            {/* </Link> */}
+            </Link>
           </div>
           
           <div className={styles["sidebar-action"]} style={{marginTop: "20px"}} >
             <Link to={Path.Chat}>
               <IconButton
-                icon={<SettingsIcon />}
+                icon={<AnalyticsIcon />}
                 text={shouldNarrow ? undefined : "Analytics"}
                 shadow 
               />
             </Link>
           </div>
-
-
       </div>
 
       <div className={styles["sidebar-tail"]}>
@@ -174,6 +226,20 @@ export function Dashboard_SideBar(props: { className?: string }) {
             </Link>
           </div>
         </div>
+        <ChatAction
+          onClick={nextTheme}
+          icon={
+            <>
+              {theme === Theme.Auto ? (
+                <AutoIcon />
+              ) : theme === Theme.Light ? (
+                <LightIcon />
+              ) : theme === Theme.Dark ? (
+                <DarkIcon />
+              ) : null}
+            </>
+          }
+        />
       </div>
 
       <div

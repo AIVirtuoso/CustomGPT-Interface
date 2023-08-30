@@ -7,13 +7,14 @@ import React, {
 import { v4 as uuidv4 } from "uuid";
 
 import BrainIcon from "../icons/brain.svg";
-import RenameIcon from "../icons/rename.svg";
-import CopyIcon from "../icons/copy.svg";
+import CancelIcon from "../icons/cancel.svg";
+import ConfirmIcon from "../icons/confirm.svg";
 import MaxIcon from "../icons/max.svg";
 import MinIcon from "../icons/min.svg";
 import ResetIcon from "../icons/reload.svg";
 import DeleteIcon from "../icons/delete.svg";
 import ChatbotIcon from "../icons/bot.svg"
+import AddBotIcon from "../icons/add-bot.svg";
 import {
   useChatStore,
   useAppConfig,
@@ -67,14 +68,14 @@ export function SessionConfigModel(props: {
         actions={[
           <IconButton
             key="reset"
-            icon={<ResetIcon />}
+            icon={<CancelIcon />}
             bordered
             text="Cancel"
             onClick={props.onClose}
           />,
           <IconButton
             key="copy"
-            icon={<CopyIcon />}
+            icon={<ConfirmIcon />}
             bordered
             text="Confirm"
             onClick={props.handleAddNewBot}
@@ -223,7 +224,7 @@ function ChatbotTable() {
         <div className="window-actions">
           <div className="window-action-button">
             <IconButton
-              icon={<RenameIcon />}
+              icon={<AddBotIcon />}
               bordered
               text="Add New Bot"
               onClick={() => setShowPromptModal(true)}
@@ -261,6 +262,7 @@ function ChatbotTable() {
         {data.length === 0 && (
           <div style={{textAlign: "center"}}>
             <h1>You don't have any bot created</h1>
+            <h2 >Please <span onClick={() => setShowPromptModal(true)} style={{color: "red", textDecoration: "underline"}}>create</span> your own chatbot</h2>
           </div>
         )}
         <div className={mask_styles["mask-page"]}>
@@ -276,7 +278,7 @@ function ChatbotTable() {
                     <div className={mask_styles["mask-title"]}>
                       <Link
                         to={`/chat/${bot._id}/ ${uuidv4().toString()}`}
-                        onClick={() => {chatStore.onNewMessage(createMessage({role: "user", content: "hhhh"}))}}
+                        onClick={() => {chatStore.newSession(); chatStore.onNewMessage(createMessage({role: "user", content: "hhhh"}))}}
                       >
                         <div className={mask_styles["mask-name"]} style={{fontSize: "17px", fontWeight: "normal"}}>{bot.name}</div>
                       </Link>

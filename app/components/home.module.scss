@@ -316,15 +316,17 @@
   display: flex;
   justify-content: space-between;
   padding-top: 20px;
+  align-items: center;
 }
 
 .sidebar-actions {
   display: inline-flex;
 }
 
-.sidebar-action:not(:last-child) {
-  margin-right: 15px;
-}
+// .sidebar-action:not(:last-child) {
+//   margin-right: 15px;
+// }
+
 
 .loading-content {
   display: flex;
