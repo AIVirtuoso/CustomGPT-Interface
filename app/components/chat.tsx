@@ -75,7 +75,7 @@ import {
   showPrompt,
   showToast,
 } from "./ui-lib";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   CHAT_PAGE_SIZE,
   LAST_INPUT_KEY,
@@ -417,7 +417,7 @@ export function ChatActions(props: {
   const config = useAppConfig();
   const navigate = useNavigate();
   const chatStore = useChatStore();
-
+  const { chatbotId, chatlogId } = useParams();
   // switch themes
   const theme = config.theme;
   function nextTheme() {
@@ -516,14 +516,14 @@ export function ChatActions(props: {
       {/* ------------------ Upload Files Icon Beggin ----------------- */}
 
       <ChatAction
-        onClick={() => {navigate(Path.Upload);}}
+        onClick={() => {navigate(Path.Upload.replace(":chatbotId", chatbotId ?? "").replace(":chatlogId", chatlogId ?? ""));}}
         text = "Upload Files"
         icon={<UploadIcon />}
       />
 
 
       <ChatAction
-        onClick={() => {navigate(Path.Url);}}
+        onClick={() => {navigate(Path.Url.replace(":chatbotId", chatbotId ?? "").replace(":chatlogId", chatlogId ?? ""));}}
         text = "Scraping Url"
         icon={<UrlIcon />}
       />

@@ -9,7 +9,7 @@ import CloseIcon from "../icons/close.svg";
 import DeleteIcon from "../icons/delete.svg";
 
 import Locale from "../locales";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import { useCallback, useEffect, useState } from "react";
 import { sendRequestsWithToken } from "../utils/fetch";
@@ -47,19 +47,22 @@ export function UrlPage() {
   const [pages, setPages] = useState<string[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [content, setContent] = useState('');
+  const { chatbotId, chatlogId } = useParams();
+
   const handleonClickAddUrlButton = useCallback(() => {
     const formdata = new FormData();
-    formdata.append("id", "35345293082374230523572");
+    formdata.append("id", chatbotId ?? "");
     formdata.append("url", linkVal);
     sendRequestsWithToken ("add-page", {
       body: formdata,
     })
       .then((response) => response.json())
       .then((result) => {
+        console.log("hello");
         setPages([...pages, linkVal]);
         setLinkVal("");
       });
-  }, [linkVal, pages]);
+  }, [linkVal, pages, chatbotId]);
 
   const handleonClickRemoveButton = useCallback((index: any) => {
     
@@ -67,7 +70,8 @@ export function UrlPage() {
     if (window.confirm("Are you sure want to delete?")) {
       const formdata = new FormData();
       formdata.append("filename", pages[index]);
-      formdata.append("id", "35345293082374230523572");
+      formdata.append("id", chatbotId ?? "");
+      formdata.append("type", "url");
       sendRequestsWithToken("clear-database-by-metadata", {
         body: formdata,
       })
@@ -79,7 +83,7 @@ export function UrlPage() {
           alert("Error");
         })
     }
-  }, [pages])
+  }, [pages, chatbotId])
 
   const fetchContent = useCallback((url: any) => {
     setShowModal(true)
@@ -96,6 +100,17 @@ export function UrlPage() {
         setContent(result);
       });
   }, []);
+
+  useEffect(() => {
+    setContent("");
+    const formdata = new FormData();
+    formdata.append("id", chatbotId ?? "");
+    sendRequestsWithToken("find-pages-by-id", {
+      body: formdata
+    })
+      .then((response) => response.json())
+      .then((result) => setPages(result));
+  }, [chatbotId]);
   
   return (
     <ErrorBoundary>

@@ -9,20 +9,17 @@ import CloseIcon from "../icons/close.svg";
 import DeleteIcon from "../icons/delete.svg";
 
 import Locale from "../locales";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import { useCallback, useEffect, useState } from "react";
-import { sendRequestsWithToken } from "../utils/fetch";
+import { sendRequestsWithToken, sendRequestsWithToken_as_JSON } from "../utils/fetch";
 
 export function UploadPage() {
   const navigate = useNavigate();
 
   const [files, setFiles] = useState<string[]>([]);
   const [file, setFile] = useState<File | undefined>(undefined);
-
-
-
-
+  const { chatbotId, chatlogId } = useParams();
 
   function readFromFile() {
     return new Promise<File>((res, rej) => { // Change the generic type to File
@@ -51,7 +48,7 @@ export function UploadPage() {
     if(file){
       const formdata = new FormData();
       formdata.append("file", file);
-      formdata.append("bot_id", "35345293082374230523572");
+      formdata.append("bot_id", chatbotId || "");
       try{
         sendRequestsWithToken('add-training-file', {
           body: formdata,
@@ -68,15 +65,16 @@ export function UploadPage() {
         console.error('File upload faild!');
       }
     }
-  }, [file, files])
+  }, [file, files, chatbotId])
 
   const handleonClickRemoveButton = useCallback((index: any) => {
     
     console.log(files[index]);
     if (window.confirm("Are you sure want to delete?")) {
       const formdata = new FormData();
-      formdata.append("filename", files[index]);
-      formdata.append("id", "35345293082374230523572");
+      formdata.append("filename", files[index] || "");
+      formdata.append("id", chatbotId || "");
+      formdata.append("type", "file");
       sendRequestsWithToken("clear-database-by-metadata", {
         body: formdata,
       })
@@ -88,7 +86,20 @@ export function UploadPage() {
           alert("Error");
         })
     }
-  }, [files])
+  }, [files, chatbotId])
+
+  useEffect(() => {
+    sendRequestsWithToken_as_JSON("find-chatbot-by-id", {
+      body: JSON.stringify({
+        id: chatbotId,
+        log_id: chatlogId,
+      }),
+    })
+      .then((response) => response.json())
+      .then((result) => {
+        setFiles(result.files);
+      })
+  }, [chatbotId, chatlogId]);
 
   return (
     <ErrorBoundary>
