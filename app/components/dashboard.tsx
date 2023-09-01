@@ -146,7 +146,14 @@ function PromptToast(props: {
 
 
 function ChatbotTable() {
-
+  
+  const [sessions, selectSession, selectedIndex] = useChatStore(
+    (state) => [
+      state.sessions,
+      state.selectSession,
+      state.currentSessionIndex,
+    ],
+  );
   const config = useAppConfig();
   const isMobileScreen = useMobileScreen();
   const chatStore = useChatStore();
@@ -159,6 +166,15 @@ function ChatbotTable() {
   const showMaxIcon = !isMobileScreen && !clientConfig?.isApp;
 
   const handleAddNewBot = () => {
+    // chatStore.newSession();
+    
+    console.log("sessionLength: ", sessions.length);
+    for(let i = 0; i < sessions.length; i ++){
+      const session = sessions[i];
+      console.log("message: ", session.messages);
+      console.log("selectedIndex: ", selectedIndex);
+      console.log("selectedmessage: ", sessions[selectedIndex].messages);
+    }
     sendRequestsWithToken_as_JSON ("add-new-chatbot", {
       body: JSON.stringify({
         name: botName,
@@ -198,6 +214,8 @@ function ChatbotTable() {
   );
 
   useEffect(() => {
+    console.log("s_len: ", chatStore.sessions.length);
+    console.log("selected: ", chatStore.currentSessionIndex);
     sendRequestsWithToken("find-all-chatbots", {})
       .then((response) => response.json())
       .then((result) => {
@@ -278,7 +296,7 @@ function ChatbotTable() {
                     <div className={mask_styles["mask-title"]}>
                       <Link
                         to={`/chat/${bot._id}/ ${uuidv4().toString()}`}
-                        onClick={() => {chatStore.newSession(); chatStore.onNewMessage(createMessage({role: "user", content: "hhhh"}))}}
+                        onClick={() => {chatStore.resetSession()}}
                       >
                         <div className={mask_styles["mask-name"]} style={{fontSize: "17px", fontWeight: "normal"}}>{bot.name}</div>
                       </Link>

@@ -92,7 +92,7 @@ interface ChatStore {
   currentSession: () => ChatSession;
   nextSession: (delta: number) => void;
   onNewMessage: (message: ChatMessage) => void;
-  onUserInput: (content: string) => Promise<void>;
+  onUserInput: (content: string, bot_Id: string, log_Id: string) => Promise<void>;
   summarizeSession: () => void;
   updateStat: (message: ChatMessage) => void;
   updateCurrentSession: (updater: (session: ChatSession) => void) => void;
@@ -200,7 +200,7 @@ export const useChatStore = create<ChatStore>()(
 
         set((state) => ({
           currentSessionIndex: 0,
-          sessions: [session].concat(state.sessions),
+          sessions: state.sessions.concat([session]),
         }));
       },
 
@@ -278,13 +278,11 @@ export const useChatStore = create<ChatStore>()(
         get().summarizeSession();
       },
 
-      async onUserInput(content) {
+      async onUserInput(content, bot_Id, log_Id) {
         const session = get().currentSession();
         const modelConfig = session.mask.modelConfig;
-
         const userContent = fillTemplateWith(content, modelConfig);
         console.log("[User Input] after template: ", userContent);
-
         const userMessage: ChatMessage = createMessage({
           role: "user",
           content: userContent,
@@ -322,6 +320,8 @@ export const useChatStore = create<ChatStore>()(
         api.llm.chat({
           messages: sendMessages,
           config: { ...modelConfig, stream: true },
+          bot_Id: bot_Id,
+          log_Id: log_Id,
           onUpdate(message) {
             botMessage.streaming = true;
             if (message) {

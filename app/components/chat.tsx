@@ -93,6 +93,8 @@ import { getClientConfig } from "../config/client";
 
 
 import { readFromFile } from "../utils";
+import { sendRequestsWithToken, sendRequestsWithToken_as_JSON } from "../utils/fetch";
+import { nanoid } from "nanoid";
 
 const Markdown = dynamic(async () => (await import("./markdown")).Markdown, {
   loading: () => <LoadingIcon />,
@@ -621,13 +623,14 @@ export function EditMessageModal(props: { onClose: () => void }) {
   );
 }
 
-function _Chat() {
+export function _Chat(props: {isChatLogs?: boolean}) {
   type RenderMessage = ChatMessage & { preview?: boolean };
-
+  const { chatbotId, chatlogId } = useParams();
   const chatStore = useChatStore();
   // chatStore.newSession();
   const session = chatStore.currentSession();
-  // const session = chatStore.newSession();
+  console.log("__Chat: ", session.messages)
+  console.log("selected_index: ", chatStore.currentSessionIndex);
   const config = useAppConfig();
   const fontSize = config.fontSize;
 
@@ -718,7 +721,7 @@ function _Chat() {
       return;
     }
     setIsLoading(true);
-    chatStore.onUserInput(userInput).then(() => setIsLoading(false));
+    chatStore.onUserInput(userInput, chatbotId || "", chatlogId || "").then(() => setIsLoading(false));
     localStorage.setItem(LAST_INPUT_KEY, userInput);
     setUserInput("");
     setPromptHints([]);
@@ -749,6 +752,10 @@ function _Chat() {
   };
 
   useEffect(() => {
+    console.log("chat_selected_index: ", chatStore.currentSessionIndex)
+    console.log("size: ", chatStore.sessions.length);
+    console.log("sel_mess: ", chatStore.currentSession().messages);
+
     chatStore.updateCurrentSession((session) => {
       const stopTiming = Date.now() - REQUEST_TIMEOUT_MS;
       session.messages.forEach((m) => {
@@ -773,7 +780,7 @@ function _Chat() {
         console.log("[Mask] syncing from global, name = ", session.mask.name);
         session.mask.modelConfig = { ...config.modelConfig };
       }
-    });
+    })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -823,6 +830,8 @@ function _Chat() {
     // 3. delete original user input and bot's message
     // 4. resend the user's input
 
+
+
     const resendingIndex = session.messages.findIndex(
       (m) => m.id === message.id,
     );
@@ -866,7 +875,7 @@ function _Chat() {
 
     // resend the message
     setIsLoading(true);
-    chatStore.onUserInput(userMessage.content).then(() => setIsLoading(false));
+    chatStore.onUserInput(userMessage.content, chatbotId || "", chatlogId || "").then(() => setIsLoading(false));
     inputRef.current?.focus();
   };
 
@@ -1049,7 +1058,7 @@ function _Chat() {
               <IconButton
                 icon={<ReturnIcon />}
                 bordered
-                title={Locale.Chat.Actions.ChatList}
+                title="{Locale.Chat.Actions.ChatList}"
                 onClick={() => navigate(Path.Home)}
               />
             </div>
@@ -1067,8 +1076,9 @@ function _Chat() {
             {Locale.Chat.SubTitle(session.messages.length)}
           </div>
         </div>
+        
         <div className="window-actions">
-          {!isMobileScreen && (
+          {!isMobileScreen && !props.isChatLogs && (
             <div className="window-action-button">
               <IconButton
                 icon={<RenameIcon />}
@@ -1077,16 +1087,34 @@ function _Chat() {
               />
             </div>
           )}
-          <div className="window-action-button">
-            <IconButton
-              icon={<ExportIcon />}
-              bordered
-              title={Locale.Chat.Actions.Export}
-              onClick={() => {
-                setShowExport(true);
-              }}
-            />
-          </div>
+          {!props.isChatLogs && (
+            <div className="window-action-button">
+              <IconButton
+                icon={<ExportIcon />}
+                bordered
+                title={Locale.Chat.Actions.Export}
+                onClick={() => {
+                  setShowExport(true);
+                }}
+              />
+            </div>
+          )}
+
+          {/* {props.isChatLogs && (
+            <div>
+              <Selector
+                // defaultSelectedValue={currentModel}
+                items={models.map((m) => ({
+                  title: m,
+                  value: m,
+                }))}
+                onClose={() => setShowModelSelector(false)}
+                onSelection={(s) => {
+                }}
+              />
+            </div>
+          )} */}
+
           {showMaxIcon && (
             <div className="window-action-button">
               <IconButton
@@ -1114,7 +1142,6 @@ function _Chat() {
         {/* ----------- Settings Modal End ------------------- */}
 
       </div>
-
       <div
         className={styles["chat-body"]}
         ref={scrollRef}
@@ -1249,51 +1276,52 @@ function _Chat() {
         })}
       </div>
 
-      <div className={styles["chat-input-panel"]}>
-        <PromptHints prompts={promptHints} onPromptSelect={onPromptSelect} />
+      {!props.isChatLogs && 
+        <div className={styles["chat-input-panel"]}>
+          <PromptHints prompts={promptHints} onPromptSelect={onPromptSelect} />
 
-        <ChatActions
-          showPromptModal={() => setShowPromptModal(true)}
-          scrollToBottom={scrollToBottom}
-          hitBottom={hitBottom}
-          showPromptHints={() => {
-            // Click again to close
-            if (promptHints.length > 0) {
-              setPromptHints([]);
-              return;
-            }
+          <ChatActions
+            showPromptModal={() => setShowPromptModal(true)}
+            scrollToBottom={scrollToBottom}
+            hitBottom={hitBottom}
+            showPromptHints={() => {
+              // Click again to close
+              if (promptHints.length > 0) {
+                setPromptHints([]);
+                return;
+              }
 
-            inputRef.current?.focus();
-            setUserInput("/");
-            onSearch("");
-          }}
-        />
-        <div className={styles["chat-input-panel-inner"]}>
-          <textarea
-            ref={inputRef}
-            className={styles["chat-input"]}
-            placeholder={Locale.Chat.Input(submitKey)}
-            onInput={(e) => onInput(e.currentTarget.value)}
-            value={userInput}
-            onKeyDown={onInputKeyDown}
-            onFocus={scrollToBottom}
-            onClick={scrollToBottom}
-            rows={inputRows}
-            autoFocus={autoFocus}
-            style={{
-              fontSize: config.fontSize,
+              inputRef.current?.focus();
+              setUserInput("/");
+              onSearch("");
             }}
           />
-          <IconButton
-            icon={<SendWhiteIcon />}
-            text={Locale.Chat.Send}
-            className={styles["chat-input-send"]}
-            type="primary"
-            onClick={() => doSubmit(userInput)}
-          />
+          <div className={styles["chat-input-panel-inner"]}>
+            <textarea
+              ref={inputRef}
+              className={styles["chat-input"]}
+              placeholder={Locale.Chat.Input(submitKey)}
+              onInput={(e) => onInput(e.currentTarget.value)}
+              value={userInput}
+              onKeyDown={onInputKeyDown}
+              onFocus={scrollToBottom}
+              onClick={scrollToBottom}
+              rows={inputRows}
+              autoFocus={autoFocus}
+              style={{
+                fontSize: config.fontSize,
+              }}
+            />
+            <IconButton
+              icon={<SendWhiteIcon />}
+              text={Locale.Chat.Send}
+              className={styles["chat-input-send"]}
+              type="primary"
+              onClick={() => doSubmit(userInput)}
+            />
+          </div>
         </div>
-      </div>
-
+      }
       {showExport && (
         <ExportMessageModal onClose={() => setShowExport(false)} />
       )}
@@ -1311,6 +1339,31 @@ function _Chat() {
 
 export function Chat() {
   const chatStore = useChatStore();
-  const sessionIndex = chatStore.currentSessionIndex;
-  return <_Chat key={sessionIndex}></_Chat>;
+  const session = chatStore.currentSession();
+  const { chatbotId, chatlogId } = useParams();
+  useEffect(() => {
+    sendRequestsWithToken_as_JSON("find-chatbot-by-id", {
+      body: JSON.stringify({
+        id: chatbotId,
+        log_id: chatlogId
+      }),
+    })
+      .then(response => response.json())
+      .then((result) => {
+        sendRequestsWithToken_as_JSON("find_messages_by_id", {
+          body: JSON.stringify({
+            logId: result.lastChatLogId,
+          }),
+        })
+          .then((response) => response.json())
+          .then((result) => {
+            console.log("result_message: ", result);
+            console.log("selected_index: ", chatStore.currentSessionIndex);
+            session.messages = result.concat();
+          })
+    })
+  }, []);
+
+  return <_Chat isChatLogs={false} ></_Chat>;
+  return <div></div>
 }

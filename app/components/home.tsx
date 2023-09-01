@@ -69,6 +69,11 @@ const UrlPage = dynamic(async () => (await import("./url")).UrlPage, {
   loading: () => <Loading noLogo />,
 });
 
+const ChatLogs = dynamic(async () => (await import("./chatlogs")).ChatLogs, {
+  loading: () => <Loading noLogo />,
+})
+
+
 export function useSwitchTheme() {
   const config = useAppConfig();
 
@@ -178,6 +183,7 @@ function Screen() {
               <Route path={Path.Chat} element={<Chat />} />
               {/* <Route path="/chat/:chatbotId" element={<Chat />} /> */}
               <Route path={Path.Settings} element={<Settings />} />
+              <Route path={Path.ChatLogs} element={<ChatLogs />} />
             </Routes>
           </div>
         </>

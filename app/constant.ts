@@ -18,7 +18,8 @@ export enum Path {
   Upload = "/chat/:chatbotId/:chatlogId/upload",
   Auth = "/auth",
   Url = "/chat/:chatbotId/:chatlogId/url",
-  Dashboard = "/dashboard"
+  Dashboard = "/dashboard",
+  ChatLogs = "/chatlogs",
 }
 
 export enum SlotID {

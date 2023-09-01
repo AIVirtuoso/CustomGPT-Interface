@@ -197,7 +197,7 @@ export function Dashboard_SideBar(props: { className?: string }) {
           </div>
 
           <div className={styles["sidebar-action"]} style={{marginTop: "20px"}} >
-            <Link to={Path.Settings}>
+            <Link to={Path.ChatLogs}>
               <IconButton
                 icon={<ChatLogsIcon />}
                 text={shouldNarrow ? undefined : "Chat Logs"}

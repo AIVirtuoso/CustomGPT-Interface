@@ -51,11 +51,11 @@ export class ChatGPTApi implements LLMApi {
   }
 
   async chat(options: ChatOptions) {
+    console.log("here_message: ", options.messages);
     const messages = options.messages.map((v) => ({
       role: v.role,
       content: v.content,
     }));
-
     console.log("Messages--: ", messages);
 
     const modelConfig = {
@@ -65,7 +65,7 @@ export class ChatGPTApi implements LLMApi {
         model: options.config.model,
       },
     };
-
+    console.log("--------log+id", options.log_Id);
     const requestPayload = {
       messages,
       stream: options.config.stream,
@@ -74,7 +74,8 @@ export class ChatGPTApi implements LLMApi {
       presence_penalty: modelConfig.presence_penalty,
       frequency_penalty: modelConfig.frequency_penalty,
       top_p: modelConfig.top_p,
-      bot_id: "35345293082374230523572",
+      bot_Id: options.bot_Id,
+      log_Id: options.log_Id
     };
 
     console.log("[Request] openai payload: ", requestPayload);
