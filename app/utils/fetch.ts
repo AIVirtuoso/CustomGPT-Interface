@@ -3,6 +3,7 @@ require('dotenv').config();
 
 
 const getFullUrl = (url: string) => { return ("http://localhost:7000/" + url); }
+// const getFullUrl = (url: string) => { return ("http://95.164.44.248:7000/" + url); }
 
 
 export const setToken = (token: string): void => {
@@ -21,24 +22,24 @@ export const getAuthorized = () => {
 };
 
 export function sendRequestsWithToken(url: string, config: any) {
-  const token = getToken();
+  // const token = getToken();
   return fetch(getFullUrl(url), {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer `,
     },
     ...config,
   })
 }
 
 
-export function sendRequestsWithToken_as_JSON(url: string, config: any){
-  const token = getToken();
+export function sendRequestsWithToken_as_JSON(url: string, config: any) {
+  // const token = getToken();
   // console.log(url);
   return fetch(getFullUrl(url), {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer `,
       "Content-Type": "application/json",
     },
     ...config,

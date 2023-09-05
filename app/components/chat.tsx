@@ -91,9 +91,11 @@ import { prettyObject } from "../utils/format";
 import { ExportMessageModal } from "./exporter";
 import { getClientConfig } from "../config/client";
 
-
 import { readFromFile } from "../utils";
-import { sendRequestsWithToken, sendRequestsWithToken_as_JSON } from "../utils/fetch";
+import {
+  sendRequestsWithToken,
+  sendRequestsWithToken_as_JSON,
+} from "../utils/fetch";
 import { nanoid } from "nanoid";
 
 const Markdown = dynamic(async () => (await import("./markdown")).Markdown, {
@@ -514,19 +516,32 @@ export function ChatActions(props: {
           });
         }}
       />
-      
+
       {/* ------------------ Upload Files Icon Beggin ----------------- */}
 
       <ChatAction
-        onClick={() => {navigate(Path.Upload.replace(":chatbotId", chatbotId ?? "").replace(":chatlogId", chatlogId ?? ""));}}
-        text = "Upload Files"
+        onClick={() => {
+          navigate(
+            Path.Upload.replace(":chatbotId", chatbotId ?? "").replace(
+              ":chatlogId",
+              chatlogId ?? "",
+            ),
+          );
+        }}
+        text="Upload Files"
         icon={<UploadIcon />}
       />
 
-
       <ChatAction
-        onClick={() => {navigate(Path.Url.replace(":chatbotId", chatbotId ?? "").replace(":chatlogId", chatlogId ?? ""));}}
-        text = "Scraping Url"
+        onClick={() => {
+          navigate(
+            Path.Url.replace(":chatbotId", chatbotId ?? "").replace(
+              ":chatlogId",
+              chatlogId ?? "",
+            ),
+          );
+        }}
+        text="Scraping Url"
         icon={<UrlIcon />}
       />
 
@@ -556,7 +571,6 @@ export function ChatActions(props: {
           }}
         />
       )}
-
     </div>
   );
 }
@@ -623,13 +637,13 @@ export function EditMessageModal(props: { onClose: () => void }) {
   );
 }
 
-export function _Chat(props: {isChatLogs?: boolean}) {
+export function _Chat(props: { isChatLogs?: boolean }) {
   type RenderMessage = ChatMessage & { preview?: boolean };
   const { chatbotId, chatlogId } = useParams();
   const chatStore = useChatStore();
   // chatStore.newSession();
   const session = chatStore.currentSession();
-  console.log("__Chat: ", session.messages)
+  console.log("__Chat: ", session.messages);
   console.log("selected_index: ", chatStore.currentSessionIndex);
   const config = useAppConfig();
   const fontSize = config.fontSize;
@@ -721,7 +735,9 @@ export function _Chat(props: {isChatLogs?: boolean}) {
       return;
     }
     setIsLoading(true);
-    chatStore.onUserInput(userInput, chatbotId || "", chatlogId || "").then(() => setIsLoading(false));
+    chatStore
+      .onUserInput(userInput, chatbotId || "", chatlogId || "")
+      .then(() => setIsLoading(false));
     localStorage.setItem(LAST_INPUT_KEY, userInput);
     setUserInput("");
     setPromptHints([]);
@@ -752,7 +768,7 @@ export function _Chat(props: {isChatLogs?: boolean}) {
   };
 
   useEffect(() => {
-    console.log("chat_selected_index: ", chatStore.currentSessionIndex)
+    console.log("chat_selected_index: ", chatStore.currentSessionIndex);
     console.log("size: ", chatStore.sessions.length);
     console.log("sel_mess: ", chatStore.currentSession().messages);
 
@@ -780,7 +796,7 @@ export function _Chat(props: {isChatLogs?: boolean}) {
         console.log("[Mask] syncing from global, name = ", session.mask.name);
         session.mask.modelConfig = { ...config.modelConfig };
       }
-    })
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -830,8 +846,6 @@ export function _Chat(props: {isChatLogs?: boolean}) {
     // 3. delete original user input and bot's message
     // 4. resend the user's input
 
-
-
     const resendingIndex = session.messages.findIndex(
       (m) => m.id === message.id,
     );
@@ -875,7 +889,9 @@ export function _Chat(props: {isChatLogs?: boolean}) {
 
     // resend the message
     setIsLoading(true);
-    chatStore.onUserInput(userMessage.content, chatbotId || "", chatlogId || "").then(() => setIsLoading(false));
+    chatStore
+      .onUserInput(userMessage.content, chatbotId || "", chatlogId || "")
+      .then(() => setIsLoading(false));
     inputRef.current?.focus();
   };
 
@@ -956,7 +972,7 @@ export function _Chat(props: {isChatLogs?: boolean}) {
   }
 
   // const messages: { message: string }[] = [];
-  
+
   const messages = useMemo(() => {
     const endRenderIndex = Math.min(
       msgRenderIndex + 3 * CHAT_PAGE_SIZE,
@@ -1049,6 +1065,17 @@ export function _Chat(props: {isChatLogs?: boolean}) {
   // edit / insert message modal
   const [isEditingMessage, setIsEditingMessage] = useState(false);
 
+  const currentModel = chatStore.currentSession().mask.modelConfig.model;
+  const models = useMemo(
+    () =>
+      config
+        .allModels()
+        .filter((m) => m.available)
+        .map((m) => m.name),
+    [config],
+  );
+  const [showModelSelector, setShowModelSelector] = useState(false);
+
   return (
     <div className={styles.chat} key={session.id}>
       <div className="window-header" data-tauri-drag-region>
@@ -1076,7 +1103,7 @@ export function _Chat(props: {isChatLogs?: boolean}) {
             {Locale.Chat.SubTitle(session.messages.length)}
           </div>
         </div>
-        
+
         <div className="window-actions">
           {!isMobileScreen && !props.isChatLogs && (
             <div className="window-action-button">
@@ -1100,20 +1127,26 @@ export function _Chat(props: {isChatLogs?: boolean}) {
             </div>
           )}
 
-          {/* {props.isChatLogs && (
-            <div>
-              <Selector
-                // defaultSelectedValue={currentModel}
-                items={models.map((m) => ({
-                  title: m,
-                  value: m,
-                }))}
-                onClose={() => setShowModelSelector(false)}
-                onSelection={(s) => {
-                }}
+          {props.isChatLogs && (
+            <>
+              <ChatAction
+                onClick={() => setShowModelSelector(true)}
+                text={currentModel}
+                icon={<RobotIcon />}
               />
-            </div>
-          )} */}
+              <div>
+                <Selector
+                  // defaultSelectedValue={currentModel}
+                  items={models.map((m) => ({
+                    title: m,
+                    value: m,
+                  }))}
+                  onClose={() => setShowModelSelector(false)}
+                  onSelection={(s) => {}}
+                />
+              </div>
+            </>
+          )}
 
           {showMaxIcon && (
             <div className="window-action-button">
@@ -1140,7 +1173,6 @@ export function _Chat(props: {isChatLogs?: boolean}) {
         />
 
         {/* ----------- Settings Modal End ------------------- */}
-
       </div>
       <div
         className={styles["chat-body"]}
@@ -1276,7 +1308,7 @@ export function _Chat(props: {isChatLogs?: boolean}) {
         })}
       </div>
 
-      {!props.isChatLogs && 
+      {!props.isChatLogs && (
         <div className={styles["chat-input-panel"]}>
           <PromptHints prompts={promptHints} onPromptSelect={onPromptSelect} />
 
@@ -1321,7 +1353,7 @@ export function _Chat(props: {isChatLogs?: boolean}) {
             />
           </div>
         </div>
-      }
+      )}
       {showExport && (
         <ExportMessageModal onClose={() => setShowExport(false)} />
       )}
@@ -1345,10 +1377,10 @@ export function Chat() {
     sendRequestsWithToken_as_JSON("find-chatbot-by-id", {
       body: JSON.stringify({
         id: chatbotId,
-        log_id: chatlogId
+        log_id: chatlogId,
       }),
     })
-      .then(response => response.json())
+      .then((response) => response.json())
       .then((result) => {
         sendRequestsWithToken_as_JSON("find_messages_by_id", {
           body: JSON.stringify({
@@ -1358,12 +1390,14 @@ export function Chat() {
           .then((response) => response.json())
           .then((result) => {
             console.log("result_message: ", result);
-            console.log("selected_index: ", chatStore.currentSessionIndex);
-            session.messages = result.concat();
-          })
-    })
-  }, []);
+            // console.log("selected_index: ", chatStore.currentSessionIndex);
+            // session.messages = result.concat();
+            chatStore.updateCurrentSession((session) => {
+              session.messages = result.concat();
+            });
+          });
+      });
+  }, [chatStore.updateCurrentSession, session, chatbotId, chatlogId]);
 
-  return <_Chat isChatLogs={false} ></_Chat>;
-  return <div></div>
+  return <_Chat isChatLogs={false}></_Chat>;
 }
