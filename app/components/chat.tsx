@@ -71,6 +71,7 @@ import {
   ListItem,
   Modal,
   Selector,
+  ChatLog_Selector,
   showConfirm,
   showPrompt,
   showToast,
@@ -97,6 +98,7 @@ import {
   sendRequestsWithToken_as_JSON,
 } from "../utils/fetch";
 import { nanoid } from "nanoid";
+import moment from "moment";
 
 const Markdown = dynamic(async () => (await import("./markdown")).Markdown, {
   loading: () => <LoadingIcon />,
@@ -637,7 +639,7 @@ export function EditMessageModal(props: { onClose: () => void }) {
   );
 }
 
-export function _Chat(props: { isChatLogs?: boolean }) {
+export function _Chat(props: { isChatLogs?: boolean; chatLogs?: any }) {
   type RenderMessage = ChatMessage & { preview?: boolean };
   const { chatbotId, chatlogId } = useParams();
   const chatStore = useChatStore();
@@ -1075,6 +1077,24 @@ export function _Chat(props: { isChatLogs?: boolean }) {
     [config],
   );
   const [showModelSelector, setShowModelSelector] = useState(false);
+  const [selectorValue, setSelectorValue] = useState("Choose Log");
+
+  const handleonSelection = (log: any) => {
+    console.log("botname: ", log.logId);
+    setSelectorValue(log.title);
+    sendRequestsWithToken_as_JSON("find_messages_by_id", {
+      body: JSON.stringify({
+        logId: log.logId,
+      }),
+    })
+      .then((response) => response.json())
+      .then((result) => {
+        console.log("log_message: ", result);
+        chatStore.updateCurrentSession((session) => {
+          session.messages = result.concat();
+        });
+      });
+  };
 
   return (
     <div className={styles.chat} key={session.id}>
@@ -1129,22 +1149,43 @@ export function _Chat(props: { isChatLogs?: boolean }) {
 
           {props.isChatLogs && (
             <>
-              <ChatAction
+              <div
+                className="window-action-button"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  width: "200px",
+                }}
                 onClick={() => setShowModelSelector(true)}
-                text={currentModel}
-                icon={<RobotIcon />}
-              />
-              <div>
-                <Selector
-                  // defaultSelectedValue={currentModel}
-                  items={models.map((m) => ({
-                    title: m,
-                    value: m,
-                  }))}
-                  onClose={() => setShowModelSelector(false)}
-                  onSelection={(s) => {}}
+              >
+                <IconButton
+                  icon={<ExportIcon />}
+                  bordered
+                  title="Choose your Chatlog"
                 />
+                <p style={{ margin: "0px 10px", padding: "0px" }}>
+                  {selectorValue}
+                </p>
               </div>
+              {showModelSelector && (
+                <div>
+                  <ChatLog_Selector
+                    // defaultSelectedValue={currentModel}
+                    logs={props.chatLogs.map((log: any) => ({
+                      title:
+                        moment(new Date(log.createdDate)).format(
+                          "MM/DD HH:mm",
+                        ) +
+                        " " +
+                        log.botName,
+                      logId: log.logId,
+                    }))}
+                    onClose={() => setShowModelSelector(false)}
+                    onSelection={(log) => handleonSelection(log)}
+                    isMax={config.tightBorder}
+                  />
+                </div>
+              )}
             </>
           )}
 

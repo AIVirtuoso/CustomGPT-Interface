@@ -485,3 +485,59 @@ export function Selector<T>(props: {
     </div>
   );
 }
+
+export function ChatLog_Selector<T>(props: {
+  logs: Array<any>;
+  defaultSelectedValue?: T;
+  onSelection?: (selection: any) => void;
+  onClose?: () => void;
+  multiple?: boolean;
+  isMax?: boolean;
+}) {
+  return (
+    <div
+      className={styles["chatlog_selector"]}
+      onClick={() => props.onClose?.()}
+    >
+      <div
+        className={
+          styles[
+            props.isMax
+              ? "chatlog_selector-content_max"
+              : "chatlog_selector-content"
+          ]
+        }
+      >
+        <List>
+          {props.logs.map((log, i) => {
+            const selected = props.defaultSelectedValue === log.title;
+            return (
+              <ListItem
+                className={styles["chatlog_selector-item"]}
+                key={i}
+                title={log.title}
+                onClick={() => {
+                  props.onSelection?.(log);
+                  props.onClose?.();
+                }}
+              >
+                {selected ? (
+                  <div
+                    style={{
+                      height: 10,
+                      width: 10,
+                      backgroundColor: "var(--primary)",
+                      borderRadius: 10,
+                    }}
+                  ></div>
+                ) : (
+                  <></>
+                )}
+              </ListItem>
+            );
+          })}
+        </List>
+      </div>
+    </div>
+  );
+}

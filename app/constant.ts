@@ -14,7 +14,7 @@ export enum Path {
   Chat = "/chat/:chatbotId/:chatlogId",
   Settings = "/settings",
   NewChat = "/new-chat",
-  Masks = "/masks",
+  Masks = "/chat/:chatbotId/:chatlogId/masks",
   Upload = "/chat/:chatbotId/:chatlogId/upload",
   Auth = "/auth",
   Url = "/chat/:chatbotId/:chatlogId/url",
