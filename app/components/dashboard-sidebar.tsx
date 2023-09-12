@@ -17,7 +17,7 @@ import DragIcon from "../icons/drag.svg";
 
 import Locale from "../locales";
 
-import { useAppConfig, useChatStore, Theme} from "../store";
+import { useAppConfig, useChatStore, Theme } from "../store";
 
 import {
   MAX_SIDEBAR_WIDTH,
@@ -103,10 +103,7 @@ function useDragSideBar() {
   };
 }
 
-function ChatAction(props: {
-  icon: JSX.Element;
-  onClick: () => void;
-}) {
+function ChatAction(props: { icon: JSX.Element; onClick: () => void }) {
   const iconRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState({
@@ -185,37 +182,38 @@ export function Dashboard_SideBar(props: { className?: string }) {
       </div>
 
       <div className={styles["sidebar-body"]}>
-        
-          <div className={styles["sidebar-action"]}  style={{marginTop: "20px"}}>
-            <Link to={Path.Home}>
-              <IconButton
-                icon={<DashboardIcon />}
-                text={shouldNarrow ? undefined : "Dashboard"}
-                shadow 
-              />
-            </Link>
-          </div>
+        <div className={styles["sidebar-action"]} style={{ marginTop: "20px" }}>
+          <Link to={Path.Home}>
+            <IconButton
+              icon={<DashboardIcon />}
+              text={shouldNarrow ? undefined : "Dashboard"}
+              shadow
+            />
+          </Link>
+        </div>
 
-          <div className={styles["sidebar-action"]} style={{marginTop: "20px"}} >
-            <Link to={Path.ChatLogs}>
-              <IconButton
-                icon={<ChatLogsIcon />}
-                text={shouldNarrow ? undefined : "Chat Logs"}
-                shadow
-                onClick={() => navigate("/chatlogs", { state: { fromHome: true } })}
-              />
-            </Link>
-          </div>
-          
-          <div className={styles["sidebar-action"]} style={{marginTop: "20px"}} >
-            <Link to={Path.Chat}>
-              <IconButton
-                icon={<AnalyticsIcon />}
-                text={shouldNarrow ? undefined : "Analytics"}
-                shadow 
-              />
-            </Link>
-          </div>
+        <div className={styles["sidebar-action"]} style={{ marginTop: "20px" }}>
+          <Link to={Path.ChatLogs}>
+            <IconButton
+              icon={<ChatLogsIcon />}
+              text={shouldNarrow ? undefined : "Chat Logs"}
+              shadow
+              onClick={() =>
+                navigate("/chatlogs", { state: { fromHome: true } })
+              }
+            />
+          </Link>
+        </div>
+
+        <div className={styles["sidebar-action"]} style={{ marginTop: "20px" }}>
+          <Link to={Path.Analytics}>
+            <IconButton
+              icon={<AnalyticsIcon />}
+              text={shouldNarrow ? undefined : "Analytics"}
+              shadow
+            />
+          </Link>
+        </div>
       </div>
 
       <div className={styles["sidebar-tail"]}>

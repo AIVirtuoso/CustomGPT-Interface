@@ -18,11 +18,10 @@ import { ErrorBoundary } from "./error";
 import { getISOLang, getLang } from "../locales";
 
 import {
-  HashRouter  as Router,
+  HashRouter as Router,
   Routes,
   Route,
   useLocation,
-  
 } from "react-router-dom";
 import { SideBar } from "./sidebar";
 import { Dashboard_SideBar } from "./dashboard-sidebar";
@@ -71,8 +70,11 @@ const UrlPage = dynamic(async () => (await import("./url")).UrlPage, {
 
 const ChatLogs = dynamic(async () => (await import("./chatlogs")).ChatLogs, {
   loading: () => <Loading noLogo />,
-})
+});
 
+const Analytics = dynamic(async () => (await import("./analytics")).Analytics, {
+  loading: () => <Loading noLogo />,
+});
 
 export function useSwitchTheme() {
   const config = useAppConfig();
@@ -152,7 +154,6 @@ function Screen() {
   }, []);
 
   return (
-    
     <div
       className={
         styles.container +
@@ -169,7 +170,6 @@ function Screen() {
         </>
       ) : (
         <>
-          
           {/* {!isHome && <SideBar className={isHome ? styles["sidebar-show"] : ""} />} */}
           <Dashboard_SideBar className={isHome ? styles["sidebar-show"] : ""} />
 
@@ -184,6 +184,7 @@ function Screen() {
               {/* <Route path="/chat/:chatbotId" element={<Chat />} /> */}
               <Route path={Path.Settings} element={<Settings />} />
               <Route path={Path.ChatLogs} element={<ChatLogs />} />
+              <Route path={Path.Analytics} element={<Analytics />} />
             </Routes>
           </div>
         </>

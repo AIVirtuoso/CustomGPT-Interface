@@ -20,6 +20,7 @@ export enum Path {
   Url = "/chat/:chatbotId/:chatlogId/url",
   Dashboard = "/dashboard",
   ChatLogs = "/chatlogs",
+  Analytics = "/analytics"
 }
 
 export enum SlotID {
