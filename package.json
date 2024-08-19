@@ -63,7 +63,7 @@
     "@tauri-apps/cli": "^1.4.0",
     "@types/formidable": "^3.4.1",
     "@types/multer": "^1.4.7",
-    "@types/node": "^20.5.6",
+    "@types/node": "^22.4.1",
     "@types/pdf-parse": "^1.1.1",
     "@types/react": "^18.2.14",
     "@types/react-dom": "^18.2.7",
